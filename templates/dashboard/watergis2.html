@@ -1740,33 +1740,33 @@
                 putWMS1("maharashtra_rivers_from_osm2");
             }
             else if (boundary == "{nashik_turbidity}") {
-                // alert("in correct place")
+                //alert("in correct place")
                 // putWMS("rtp:mumbai_toilets_nancleared");  //shapefile
-                putWMS1("Nashik_water_quality_turbidity");
+                getNashikBoundary("turbidity");
             }
             else if (boundary == '{nashik_alkalinity}') {
-                putWMS1("Nashik_water_quality_alkanility0")
+                getNashikBoundary("alkanility")
             }
             else if (boundary == '{nashik_ph}') {
-                putWMS1("Nashik_water_quality_ph")
+                getNashikBoundary("pH_1")
             }
             else if (boundary == '{nashik_nitrates}') {
-                putWMS1("Nashik_water_quality_Nitrates")
+                getNashikBoundary("Nitrates")
             }
             else if (boundary == '{nashik_flourides}') {
-                putWMS1("Nashik_water_quality_Flourides")
+                getNashikBoundary("Fluorides")
             }
             else if (boundary == '{nashik_chloride}') {
-                putWMS1("Nashik_water_quality_Chloride")
+                getNashikBoundary("chloride")
             }
             else if (boundary == '{nashik_sulphate}') {
-                putWMS1("Nashik_water_quality_Sulphate")
+                getNashikBoundary("sulphates")
             }
             else if (boundary == '{nashik_odour}') {
-                putWMS1("Nashik_water_quality_Odour")
+                getNashikBoundary("Odour")
             }
             else if (boundary == '{nashik_taste}') {
-                putWMS1("Nashik_water_quality_Taste")
+                getNashikBoundary("Taste")
             }
             
 
@@ -1870,11 +1870,11 @@
             // else if (boundary == '{ashele_line}') {
             //     removeWMS("Ashele_line")
             // }
-            else if (boundary == '{nashik_turbidity}') {
-                removeWMS("Nashik_water_quality_turbidity")
+           else if (boundary == '{nashik_turbidity}') {
+                removeWMS("turbidity")
             }
             else if (boundary == '{nashik_alkalinity}') {
-                removeWMS("Nashik_water_quality_alkanility0")
+                removeWMS("alkanility")
             }
             else if (boundary == '{nashik_ph}') {
                 removeWMS("Nashik_water_quality_ph")
@@ -1914,6 +1914,28 @@
 
 
         }
+    }
+   
+    function getNashikBoundary(obj) {
+     
+
+    var wms_boundary_layer = L.tileLayer.wms('https://geonode.communitygis.in/geoserver/wms', {
+        layers: 'geonode:Nashik_water_quality_9jan23',
+        format: 'image/png',
+        transparent: 'true',
+        opacity: '100%', 
+        tiled: true,
+        Styles: obj,
+    });
+
+    wms_boundary_layer.addTo(mymap);
+    addnashikWMSLegend(obj);
+}
+    function addnashikWMSLegend(obj) {
+        // alert("In grpahics")
+        lagendGraphic1 = "https://geonode.communitygis.in/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=geonode:Nashik_water_quality_9jan23&STYLE="+ obj +"&LEGEND_OPTIONS=forceLabels:on";
+        wms_legend1 = L.wmsLegend(lagendGraphic1);
+        wms_legend1.addTo(mymap);
     }
 
     function getBoundaryst(obj) {
@@ -4618,13 +4640,12 @@
             wms_layer1 = L.tileLayer.wms('https://geonode.communitygis.in/geoserver/wms', {
                 layers: layer,
                 format: 'image/png',
-                transparent: 'true',
+                //transparent: 'true',
                 zoom: '16',
                 // propertyName: 'field_13,latitude,longitude', 
             });
 
         }
-
 
 
         wms_layer1.addTo(mymap);
