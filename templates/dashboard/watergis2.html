@@ -477,7 +477,6 @@
     } */
 </style>
 
-
 <!-- Bootstrap row -->
 
 <div class="con">
@@ -545,13 +544,24 @@
 
 
 
-                        <form action="" method="get" id="form_district" class="mt-2">
+                        <!-- <form action="" method="get" id="form_district" class="mt-2">
                             <div class="form-group tooltips  m-1 " title="Please select the District">
                                 <select class="form-control" id="district" name="district">
                                     <option value="">Select District</option>
                                 </select>
                             </div>
+                        </form> -->
+                        <form action="{% url 'watergis2' %}" method="get" id="form_district" class="mt-2">
+                            <div class="form-group tooltips m-1" title="Please select the District">
+                                <select class="form-control" id="district" name="district" onchange="this.form.submit()">
+                                    <option value="">Select District</option>
+                                    {% for d in district_list %}
+                                        <option value="{{ d }}" {% if d == district_name %}selected{% endif %}>{{ d }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </form>
+                        
                     </div>
                 </div>
 
@@ -1282,11 +1292,6 @@
                 timer: 2000
             });
         }
-
-
-
-
-        // }
     });
 
     $("#downloadtable").click(function () {
@@ -4492,6 +4497,29 @@ function addnashikWMSLegend(obj) {
             console.error("Error loading CSV:", error);
         });
 }
+function getRemarks(key, value) {
+    if (key in keyParameters) { // loads keyParameters from js/keyParameters.js
+        let remarksObj = keyParameters[key].remarks;
+        for (let remark in remarksObj) {
+            // Assuming the value is a percentage or other comparable unit
+            if (typeof value === 'number') {
+                if (remark.includes('>') && value > parseFloat(remark.replace('>', '').replace('%', '').trim())) {
+                    return remarksObj[remark];
+                } else if (remark.includes('<') && value < parseFloat(remark.replace('<', '').replace('%', '').trim())) {
+                    return remarksObj[remark];
+                } else if (remark.includes('-')) {
+                    const [min, max] = remark.split('-').map(val => parseFloat(val.replace('%', '').trim()));
+                    if (value >= min && value <= max) {
+                        return remarksObj[remark];
+                    }
+                }
+            } else if (value === remark) {
+                return remarksObj[remark];
+            }
+        }
+    }
+    return value; // return the original value if no match found
+}
 
 
     let keyMapping = {};
@@ -4512,6 +4540,15 @@ function addnashikWMSLegend(obj) {
                         // Add event listener for map clicks to trigger Identify function
             mymap.addEventListener('click', Identify);
         }
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     console.log("loaded")
+    //         console.log('keyParameters:', keyParameters); // Check if keyParameters is defined
+    //         if (keyParameters && 'Availability of ATM' in keyParameters) {
+    //             console.log('Availability of ATM:', keyParameters.param1);
+    //         } else {
+    //             console.error('keyParameters not defined or missing param1');
+    //         }
+    //     });
     function Identify(e) {
 
         //console.log("Identify");
@@ -4560,7 +4597,10 @@ function addnashikWMSLegend(obj) {
                         var displayKey = keyMapping[key] || key; // Use descriptive name or fallback to the key
                         // Format the display key by replacing underscores with spaces and capitalizing the words
                         displayKey = displayKey.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
-                        popupContent += "<tr><td><b>" + displayKey + ":</b></td><td>" + properties[key] + "</td></tr>";
+                        // Get remarks if available
+                        var displayValue = getRemarks(displayKey, properties[key]);
+                        
+                        popupContent += "<tr><td><b>" + displayKey + ":</b></td><td>" + displayValue + "</td></tr>";
                     }
                 }
 
@@ -5202,7 +5242,7 @@ async function updateStressLevelsOnMap() {
     function addStressLegend() {
         stress_legend.onAdd = function (map) {
             const div = L.DomUtil.create('div', 'info stress_legend');
-            const labels = ['<strong>Premonsoon Stress Level (Assuming 135 liters per capita per day)</strong>'];
+            const labels = ['<strong>Pre-monsoon Stress Level (Assuming 135 liters per capita per day)</strong>'];
             const ranges = [
                 {label: 'Population data missing', color: 'blue'},
                 {label: '0 - 0.05 cubic m per capita', color: '#500207'},
